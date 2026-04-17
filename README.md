@@ -72,7 +72,3 @@ Fraud detected
 * Build interactive dashboard
 * Improve model accuracy with larger datasets
 
-## 💼 Use Case
-
-This project is relevant for iGaming and sportsbook platforms such as Digitain, where fraud detection and risk analysis are critical.
-
