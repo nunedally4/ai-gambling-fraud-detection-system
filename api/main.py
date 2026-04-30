@@ -1,14 +1,44 @@
 from fastapi import FastAPI
-from analysis.detect import detect_fraud
+from pydantic import BaseModel
+import joblib
+import numpy as np
+import os
 
-app = FastAPI()
+app = FastAPI(title="Bet Fraud Detection API")
 
-@app.get("/check")
 
-def check_bet(amount: float, time_between: float, odds: float):
-    result = detect_fraud(amount, time_between, odds)
-    
-    if result == 1:
-        return {"status": "Fraud detected"}
-    else:
-        return {"status": "Normal bet"}
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+model_path = os.path.join(BASE_DIR, "fraud_model.pkl")
+
+model = joblib.load(model_path)
+class Bet(BaseModel):
+    bet_amount: float
+    time_between_bets: float
+    odds: float
+
+
+@app.get("/")
+def root():
+    return {"message": "Bet Fraud Detection API is running"}
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+@app.post("/predict")
+def predict(bet: Bet):
+    data = np.array([[
+        bet.bet_amount,
+        bet.time_between_bets,
+        bet.odds
+    ]])
+
+    prediction = model.predict(data)[0]
+    probability = model.predict_proba(data)[0][1]
+
+    return {
+        "fraud": int(prediction),
+        "fraud_probability": float(probability)
+    }
