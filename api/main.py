@@ -3,6 +3,13 @@ from pydantic import BaseModel
 import joblib
 import numpy as np
 import os
+from fastapi import UploadFile, File
+import boto3
+import uuid
+
+s3 = boto3.client("s3")
+
+BUCKET_NAME = "nunebucketf"
 
 app = FastAPI(title="Bet Fraud Detection API")
 
@@ -41,4 +48,19 @@ def predict(bet: Bet):
     return {
         "fraud": int(prediction),
         "fraud_probability": float(probability)
+    }
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+
+    file_key = f"uploads/{uuid.uuid4()}_{file.filename}"
+
+    s3.upload_fileobj(
+        file.file,
+        BUCKET_NAME,
+        file_key
+    )
+
+    return {
+        "message": "uploaded successfully",
+        "file_key": file_key
     }
