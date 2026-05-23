@@ -7,8 +7,7 @@ from fastapi import FastAPI, UploadFile, File
 import boto3
 import base64
 import json
-
-lambda_client = boto3.client("lambda")
+lambda_client = boto3.client("lambda", region_name="us-east-1")
 
 
 app = FastAPI(title="Bet Fraud Detection API")
