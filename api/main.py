@@ -47,7 +47,8 @@ def predict(bet: Bet):
     return {
         "fraud": int(prediction),
         "fraud_probability": float(probability)
-    }@app.post("/upload")
+    }
+@app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
 
     content = await file.read()
