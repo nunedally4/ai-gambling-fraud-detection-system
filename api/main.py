@@ -4,10 +4,16 @@ import joblib
 import numpy as np
 import os
 from fastapi import FastAPI, UploadFile, File
-import boto3
 import base64
 import json
-lambda_client = boto3.client("lambda", region_name="us-east-1")
+from kafka import KafkaProducer
+import json
+
+producer = KafkaProducer(
+    bootstrap_servers='localhost:9092',
+    value_serializer=lambda v: json.dumps(v).encode('utf-8')
+)
+
 
 
 app = FastAPI(title="Bet Fraud Detection API")
@@ -27,10 +33,30 @@ class Bet(BaseModel):
 def root():
     return {"message": "Bet Fraud Detection API is running"}
 
+@app.post("/send")
+def send(bet: Bet):
+    data = {
+        "bet_amount": bet.bet_amount,
+        "time_between_bets": bet.time_between_bets,
+        "odds": bet.odds
+    }
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+    producer.send("transactions-topic", data)
+
+    return {"status": "sent to kafka", "data": data}
+
+@app.post("/send-to-stream")
+def send_to_stream(bet: Bet):
+
+    data = {
+        "bet_amount": bet.bet_amount,
+        "time_between_bets": bet.time_between_bets,
+        "odds": bet.odds
+    }
+
+    producer.send("transactions-topic", data)
+
+    return {"status": "sent to kafka"}
 
 
 @app.post("/predict")
