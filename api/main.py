@@ -8,6 +8,12 @@ import base64
 import json
 from kafka import KafkaProducer
 import json
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi import Request
+
+templates = Jinja2Templates(directory="api/templates")
+
 
 producer = KafkaProducer(
     bootstrap_servers='localhost:9092',
@@ -44,6 +50,13 @@ def send(bet: Bet):
     producer.send("transactions-topic", data)
 
     return {"status": "sent to kafka", "data": data}
+
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request}
+    )
 
 @app.post("/send-to-stream")
 def send_to_stream(bet: Bet):
