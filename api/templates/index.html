@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fraud Detection</title>
+</head>
+<body>
+
+<h2>Bet Fraud Detection</h2>
+
+<input id="bet_amount" placeholder="Bet Amount"><br><br>
+<input id="time_between_bets" placeholder="Time Between Bets"><br><br>
+<input id="odds" placeholder="Odds"><br><br>
+
+<button onclick="sendData()">Check</button>
+
+<h3 id="result"></h3>
+
+<script>
+async function sendData() {
+
+    const response = await fetch("/send", {
+        method: "POST",
+        headers: {
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+            bet_amount: parseFloat(document.getElementById("bet_amount").value),
+            time_between_bets: parseFloat(document.getElementById("time_between_bets").value),
+            odds: parseFloat(document.getElementById("odds").value)
+        })
+    });
+
+    const data = await response.json();
+
+    document.getElementById("result").innerHTML =
+        JSON.stringify(data);
+}
+</script>
+
+</body>
+</html>
